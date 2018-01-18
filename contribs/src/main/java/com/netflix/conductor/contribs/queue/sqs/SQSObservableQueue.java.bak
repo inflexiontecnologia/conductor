@@ -85,7 +85,6 @@ public class SQSObservableQueue implements ObservableQueue {
 	private SQSObservableQueue(String queueName, AmazonSQSClient client, int visibilityTimeout, int batchSize, int pollTimeInMS, List<String> accountsToAuthorize) {
 		this.queueName = queueName;
 		this.client = client;
-		client.setEndpoint("https://sqs.sa-east-1.amazonaws.com");
 		this.visibilityTimeout = visibilityTimeout;
 		this.batchSize = batchSize;
 		this.pollTimeInMS = pollTimeInMS;
@@ -178,7 +177,6 @@ public class SQSObservableQueue implements ObservableQueue {
 		
 		public Builder withClient(AmazonSQSClient client) {
 			this.client = client;
-			client.setEndpoint("https://sqs.sa-east-1.amazonaws.com");
 			return this;
 		}
 		
@@ -206,7 +204,6 @@ public class SQSObservableQueue implements ObservableQueue {
 	@VisibleForTesting
 	String getOrCreateQueue() {
         List<String> queueUrls = listQueues(queueName);
-        logger.info(queueUrls.toString());
 		if (queueUrls == null || queueUrls.isEmpty()) {			
             CreateQueueRequest createQueueRequest = new CreateQueueRequest().withQueueName(queueName);
             CreateQueueResult result = client.createQueue(createQueueRequest);
@@ -258,18 +255,14 @@ public class SQSObservableQueue implements ObservableQueue {
 	
 	void publishMessages(List<Message> messages) {
 		logger.info("Sending {} messages", messages.size());
-		
 		SendMessageBatchRequest batch = new SendMessageBatchRequest(queueURL);
-		logger.info(queueURL);
 		messages.stream().forEach(msg -> {
 			SendMessageBatchRequestEntry sendr = new SendMessageBatchRequestEntry(msg.getId(), msg.getPayload());
-			logger.info(msg.getId());
-			logger.info(msg.getPayload());
 			batch.getEntries().add(sendr);
 		});
 		logger.info("sending {}", batch.getEntries().size());
 		SendMessageBatchResult result = client.sendMessageBatch(batch);
-		logger.info("send result {}", result.getSuccessful().toString());
+		logger.info("send result {}", result.getFailed().toString());
 	}
 	
 	@VisibleForTesting

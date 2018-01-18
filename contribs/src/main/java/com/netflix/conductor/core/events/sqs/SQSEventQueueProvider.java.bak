@@ -46,7 +46,6 @@ public class SQSEventQueueProvider implements EventQueueProvider {
 	@Inject
 	public SQSEventQueueProvider(AmazonSQSClient client) {
 		this.client = client;
-		client.setEndpoint("https://sqs.sa-east-1.amazonaws.com");
 		EventQueues.registerProvider(QueueType.sqs, this);
 	}
 	
